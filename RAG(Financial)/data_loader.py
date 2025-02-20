@@ -55,12 +55,12 @@ def build_faiss_index(documents, model='all-MiniLM-L6-v2'):
     index.add(embeddings)
     return index
 
-def save_documents(documents, file_path='documents.pkl'):
+def save_documents(documents, file_path='data/indexes/documents.pkl'):
     """Save the list of documents to a pickle file for persistence."""
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, 'wb') as f:
         pickle.dump(documents, f)
 
-def load_documents(file_path='documents.pkl'):
+def load_documents(file_path='data/indexes/documents.pkl'):
     """Load documents from a saved pickle file."""
-    with open(file_path, 'rb') as f:
-        return pickle.load(f)
+    return pickle.load(open(file_path, 'rb'))

@@ -6,8 +6,9 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 
 DATA_DIR = "data"
-FAISS_INDEX_PATH = "faiss_index.idx"
-DOCUMENTS_PATH = "documents.pkl"
+INDEXES_DIR = os.path.join(DATA_DIR, "indexes")
+FAISS_INDEX_PATH = os.path.join(INDEXES_DIR, "faiss_index.idx")
+DOCUMENTS_PATH = os.path.join(INDEXES_DIR, "documents.pkl")
 
 def main():
     """RAG application with iterative query loop."""
