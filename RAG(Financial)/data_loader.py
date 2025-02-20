@@ -1,23 +1,26 @@
 import os
-import glob
 import faiss
 import numpy as np
+import json
+import pickle
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
-import pickle
 
 def load_documents_from_folder(folder_path):
-    """Load all .txt and .pdf files from a folder and return their text content."""
+    """Load all .txt, .pdf, and .json files from a folder and its subfolders."""
     documents = []
-    for ext in ['.txt', '.pdf']:
-        files = glob.glob(os.path.join(folder_path, f'*{ext}'))
+    for root, _, files in os.walk(folder_path):
         for file in files:
-            if ext == '.txt':
-                content = _read_text_file(file)
-            else:
-                content = _read_pdf_file(file)
-            if content:
-                documents.append(content)
+            if file.endswith('.txt') or file.endswith('.pdf') or file.endswith('.json'):
+                file_path = os.path.join(root, file)
+                if file.endswith('.txt'):
+                    content = _read_text_file(file_path)
+                elif file.endswith('.pdf'):
+                    content = _read_pdf_file(file_path)
+                elif file.endswith('.json'):
+                    content = _read_json_file(file_path)
+                if content:
+                    documents.append(content)
     return documents
 
 def _read_text_file(file_path):
@@ -36,6 +39,20 @@ def _read_pdf_file(file_path):
         return '\n'.join([page.extract_text() for page in pdf.pages]).strip()
     except Exception as e:
         print(f"Error extracting text from PDF {file_path}: {e}")
+        return None
+
+def _read_json_file(file_path):
+    """Convert JSON event data to text representation."""
+    try:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+        return f"Event: {data.get('event', '')}\n" \
+               f"Date: {data.get('date', '')}\n" \
+               f"Impact: {data.get('impact', '')}\n" \
+               f"Actual: {data.get('actual', '')}\n" \
+               f"Forecast: {data.get('forecast', '')}"
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
         return None
 
 def build_faiss_index(documents, model='all-MiniLM-L6-v2'):

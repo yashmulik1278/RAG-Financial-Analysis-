@@ -1,9 +1,12 @@
+import os
+import faiss
+import numpy as np
+from datetime import datetime
+from sentence_transformers import SentenceTransformer
 from data_loader import load_documents_from_folder, build_faiss_index, save_documents, load_documents
 from gemini_api import GeminiClient
-import faiss
-import os
-import numpy as np
-from sentence_transformers import SentenceTransformer
+import news_fetcher
+import events_fetcher
 
 DATA_DIR = "data"
 INDEXES_DIR = os.path.join(DATA_DIR, "indexes")
@@ -11,26 +14,39 @@ FAISS_INDEX_PATH = os.path.join(INDEXES_DIR, "faiss_index.idx")
 DOCUMENTS_PATH = os.path.join(INDEXES_DIR, "documents.pkl")
 
 def main():
-    """RAG application with iterative query loop."""
+    """RAG application with automatic data updates and iterative query loop."""
+    # Ensure data directory exists
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
-        print(f"Created data directory at {DATA_DIR}. Add .txt/.pdf files to proceed.")
-        return
+        print(f"Created data directory at {DATA_DIR}. Proceeding with initial setup.")
+    
+    # Fetch latest forex news every time
+    print("Fetching latest forex news...")
+    news_fetcher.fetch_forex_news()
+    
+    # Fetch economic events every time
+    print("Fetching economic events...")
+    events_fetcher.fetch_economic_events()
 
     # Load or build FAISS index and document list
-    if not (os.path.exists(FAISS_INDEX_PATH) and os.path.exists(DOCUMENTS_PATH)):
+    if os.path.exists(FAISS_INDEX_PATH) and os.path.exists(DOCUMENTS_PATH):
+        # Check if new documents exist
         docs = load_documents_from_folder(DATA_DIR)
-        if not docs:
-            print("No documents found in data directory. Exiting.")
-            return
-        
-        print("Building FAISS index...")
+        if len(docs) > len(load_documents(DOCUMENTS_PATH)):
+            print("New documents found. Rebuilding FAISS index...")
+            index = build_faiss_index(docs)
+            faiss.write_index(index, FAISS_INDEX_PATH)
+            save_documents(docs, DOCUMENTS_PATH)
+        else:
+            print("No new documents. Loading existing FAISS index...")
+            index = faiss.read_index(FAISS_INDEX_PATH)
+            docs = load_documents(DOCUMENTS_PATH)
+    else:
+        print("Building FAISS index for the first time...")
+        docs = load_documents_from_folder(DATA_DIR)
         index = build_faiss_index(docs)
         faiss.write_index(index, FAISS_INDEX_PATH)
         save_documents(docs, DOCUMENTS_PATH)
-    else:
-        index = faiss.read_index(FAISS_INDEX_PATH)
-        docs = load_documents(DOCUMENTS_PATH)
     
     gemini = GeminiClient()
     top_k = 3  # Number of retrieved documents
