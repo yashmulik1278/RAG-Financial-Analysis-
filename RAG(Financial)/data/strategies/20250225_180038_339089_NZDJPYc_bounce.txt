@@ -1,0 +1,9 @@
+Symbol: NZDJPYc
+Strategy: Bounce
+Trend: bearish
+EMAs: EMA18=85.58940, EMA50=85.67796, EMA200=85.88661
+Candle Pattern: Bounce detected
+Stoploss: 85.62510
+EntryPrice: 85.62500
+TakeProfit: 85.62100
+Timestamp: 20250225_180038_339089

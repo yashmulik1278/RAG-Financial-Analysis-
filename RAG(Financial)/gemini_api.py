@@ -10,49 +10,43 @@ class GeminiClient:
         self.api_key = os.getenv("GOOGLE_AI_STUDIO_API_KEY")
         self.base_url = 'https://generativelanguage.googleapis.com/v1beta'
         self.model = 'gemini-1.5-flash'
-        self.max_tokens = 2048
 
     def trim_context(self, docs):
-        """Trim context to fit within Gemini’s token limit."""
-        tokenizer = tiktoken.get_encoding('gpt2')
+        tokenizer = tiktoken.get_encoding('cl100k_base')
         combined = '\n'.join(docs)
         encoded = tokenizer.encode(combined)
-        # Return the first 2000 tokens or as much as possible
-        return tokenizer.decode(encoded[:self.max_tokens]) if encoded else ''
+        max_tokens = 32768
+        return tokenizer.decode(encoded[:max_tokens]) if encoded else ''
 
     def generate_answer(self, query, context_docs):
-        """Generate an answer using Google Gemini API with strict context."""
         if not self.api_key:
-            return "API key not found. Set the GOOGLE_AI_STUDIO_API_KEY."
+            return "API key not found."
+        
+        context = self.trim_context(context_docs)
+        if not context:
+            return "No valid context found."
 
-        trimmed_context = self.trim_context(context_docs)
-        if not trimmed_context:
-            return "No valid context found for the query."
-
-        prompt = f"""
-            Answer the following financial query using ONLY the provided context.
-
-            Context:
-            {trimmed_context}
-
-            Question:
-            {query}
-
-            Answer:
-        """
+        prompt = f"Answer the query \"{query}\" using the context:\n\n{context}\n\nYour response (start of reply):"
 
         headers = {"Content-Type": "application/json"}
         endpoint = f"{self.base_url}/models/{self.model}:generateContent?key={self.api_key}"
         payload = {
-            "contents": [{"parts": [{"text": prompt}]}]
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generation_config": {
+                "temperature":0.7,
+                "max_output_tokens": 8192
+            }
         }
 
         try:
             response = requests.post(endpoint, headers=headers, json=payload)
             response.raise_for_status()
             response_json = response.json()
-            return response_json.get(
-                'candidates', [{}]
-            )[0].get('content', {}).get('parts', [{}])[0].get('text', 'No answer available.')
+            candidates = response_json.get('candidates', [])
+            if candidates:
+                content = candidates[0].get('content', {})
+                return content.get('parts', [{}])[0].get('text', 'No answer.')
+            else:
+                return 'No answer.'
         except Exception as e:
-            return f"Error generating answer: {e}"
+            return f"Error generating answer: {str(e)}"

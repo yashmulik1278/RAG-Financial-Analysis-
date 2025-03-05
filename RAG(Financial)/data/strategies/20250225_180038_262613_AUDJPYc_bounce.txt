@@ -1,0 +1,9 @@
+Symbol: AUDJPYc
+Strategy: Bounce
+Trend: bearish
+EMAs: EMA18=94.87040, EMA50=94.93887, EMA200=95.19830
+Candle Pattern: Bounce detected
+Stoploss: 94.94010
+EntryPrice: 94.94000
+TakeProfit: 94.93600
+Timestamp: 20250225_180038_262613

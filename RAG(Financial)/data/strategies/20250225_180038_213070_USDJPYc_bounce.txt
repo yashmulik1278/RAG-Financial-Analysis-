@@ -1,0 +1,9 @@
+Symbol: USDJPYc
+Strategy: Bounce
+Trend: bearish
+EMAs: EMA18=149.65669, EMA50=149.67175, EMA200=149.74739
+Candle Pattern: Bounce detected
+Stoploss: 149.64710
+EntryPrice: 149.64700
+TakeProfit: 149.64300
+Timestamp: 20250225_180038_213070

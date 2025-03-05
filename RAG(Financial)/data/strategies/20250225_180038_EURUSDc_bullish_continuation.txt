@@ -1,0 +1,8 @@
+Symbol: EURUSDc
+Strategy: TrendContinuation
+Trend: bullish
+Stoploss: 1.04609
+EntryPrice: 1.04909
+TakeProfit: 1.05039
+EMAs: EMA18=1.04762, EMA50=1.04747, EMA200=1.04533
+Candle Pattern: Bullish

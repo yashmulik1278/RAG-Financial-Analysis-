@@ -1,0 +1,8 @@
+Symbol: NZDUSDc
+Strategy: DailyBiasCandlePatterns
+Trend: bearish
+Stoploss: 0.57273
+EntryPrice: 0.57213
+TakeProfit: 0.57073
+EMAs: EMA18=1.23456, EMA50=0.56936, EMA200=0.58396
+Candle Pattern: Bearish

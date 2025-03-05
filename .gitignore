@@ -1,3 +1,25 @@
-.venv/
-RAG(Financial)/.env
+# Compiled Python files
+__pycache__/
+*.pyc
 
+# Virtual environments
+.venv/
+*.env
+
+# FAISS indexes and data
+data/indexes/
+data/forex_news/
+data/strategies/
+
+ChessHack/
+
+karans app/
+
+# Local configuration
+*.local
+
+# IDEs
+.idea/
+.vscode/
+*.sublime*
+*.vs*
