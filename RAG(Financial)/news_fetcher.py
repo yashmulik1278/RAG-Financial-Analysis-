@@ -101,7 +101,7 @@ def fetch_forex_news(news_dir):
             print(f"Error processing article: {str(e)}")
             continue
 
-    print(f"Saved {saved_count} new news articles.")
+    # print(f"Saved {saved_count} new news articles.")
 
 if __name__ == "__main__":
     os.makedirs("data/forex_news", exist_ok=True)

@@ -6,8 +6,35 @@ import pickle
 import pandas as pd
 from pypdf import PdfReader
 from sentence_transformers import SentenceTransformer
+from knowledge_graph import KnowledgeGraphBuilder
 from datetime import datetime
 import hashlib
+
+from graph_query import GraphQuery
+
+def build_knowledge_graph(documents, export_to_csv=False, csv_dir=None):
+    if not documents:
+        print("No documents to build knowledge graph")
+        return [], []
+    
+    graph_builder = KnowledgeGraphBuilder()
+    
+    for doc in documents:
+        entities = graph_builder.extract_entities(doc)
+        relationships = graph_builder.extract_relationships(doc)
+        
+        graph_builder.create_nodes(entities)
+        graph_builder.create_relationships(relationships)
+
+    # Export to CSV if requested
+    if export_to_csv:
+        if not csv_dir:
+            csv_dir = "graph_visualization_files"
+        graph_builder.export_to_csv(csv_dir)
+        print(f"Graph data exported to {csv_dir}")
+
+    # Return entities and relationships instead of exporting to CSV or uploading to Neo4j
+    return graph_builder.entities.get("nodes", []), graph_builder.entities.get("relationships", [])
 
 def _read_any_file(file_path):
     if file_path.endswith('.txt'):
@@ -36,18 +63,14 @@ def _read_json_file(file_path):
             data = json.load(f)
         
         content = []
-        if isinstance(data, dict):  # If it is a dictionary
+        if isinstance(data, dict):
             for key, value in data.items():
-                if key == 'pairs':
-                    pairs = [f"{k}/{v}" if isinstance(v, str) else f"{k}/{','.join(v)}" for k, v in value.items()]
-                    content.append(f"Pairs: {','.join(pairs)}")
-                else:
-                    content.append(f"{key.capitalize()}: {value}")
-        elif isinstance(data, list):  # If it is a list
+                content.append(f"{key.capitalize()}: {value}")
+        elif isinstance(data, list):
             for item in data:
                 if isinstance(item, dict):
-                    for key, value in item.items():
-                        content.append(f"{key.capitalize()}: {value}")
+                    item_content = [f"{k.capitalize()}: {v}" for k, v in item.items()]
+                    content.append(' '.join(item_content))
                 else:
                     content.append(str(item))
         else:
@@ -56,6 +79,7 @@ def _read_json_file(file_path):
     except Exception as e:
         print(f"JSON reading error: {e}")
         return None
+
 def _read_text_file(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -141,6 +165,7 @@ def build_faiss_index(documents, model='all-MiniLM-L6-v2'):
     
     index.add(embeddings)
     return index
+
 def save_documents(documents, file_path='data/indexes/documents.pkl'):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, 'wb') as f:

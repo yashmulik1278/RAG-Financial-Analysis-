@@ -50,3 +50,14 @@ class GeminiClient:
                 return 'No answer.'
         except Exception as e:
             return f"Error generating answer: {str(e)}"
+    
+    def generate_answer_from_graph(self, query, graph_results):
+        if not graph_results:
+            return "No relevant information found in knowledge graph"
+    
+        context = "\n".join([
+            f"{item['related'].get('name')}: {item['related'].get('label')}"
+            for item in graph_results
+        ])
+    
+        prompt = f"Answer the query \"{query}\" using the knowledge graph context:\n\n{context}\n\nYour response:"
