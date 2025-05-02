@@ -1,4 +1,5 @@
 {
+    "data\\file_tracker.json": "28bffb3e17c077c0965140b025a32389fe5984768d16a8a948807fd644f2b7a1",
     "data\\forex_news\\forex_news_20250409_090904.json": "3467af060df343d65291f988097112db9e7be4369c4b5146e09298a070dd0594",
     "data\\forex_news\\forex_news_20250409_092503.json": "a650579397708cadb2d14e3528ab489ba945a66255f9bbd2f21a0fe0faa11bca",
     "data\\forex_news\\forex_news_20250409_093025.json": "acb4b308c5ce5e696d103d8cbe34135e6905a1ae7e20b957f8bd10baa94e4f1e",
@@ -210,7 +211,8 @@
     "data\\forex_news\\forex_news_20250424_071600.json": "a60f6a4554694f3d9bea9d64fec5e8b4a55fc7002b40d28821eeeb73e04ad691",
     "data\\forex_news\\forex_news_20250424_072147.json": "55b48a44461e1f53d2a000bd2df1ec9b3792f7ab761b7ba687c3fcad46c4fffd",
     "data\\forex_news\\forex_news_20250424_083012.json": "78206ed9b6db75fe3caf2534a1af7cc2a71b52958e36eeeb81f817599e183483",
-    "data\\indexes\\file_tracker.json": "ec1ee9220e759eab385f8ee4b93addc27c7774eb03ee5afe46298f207b180ac0",
+    "data\\forex_news\\forex_news_20250424_083858.json": "b8778e99305210f8a6151184ab9ab10bd72116e6eb1a6adfa479b742b687f126",
+    "data\\indexes\\file_tracker.json": "79896b57de14a909fd8541e432d2eab273820437e7201d19d21e55eb56af0802",
     "data\\strategies\\20250225_180038_213070_USDJPYc_bounce.txt": "1d6bad0a86a54dd27cf752dec47c8fd6168d2e565804d4fe23acf6006b3abcfe",
     "data\\strategies\\20250225_180038_262613_AUDJPYc_bounce.txt": "38b128f467e3ec2f65d709758bfbd327fa360269c566ef1f8893ab8abe0a3818",
     "data\\strategies\\20250225_180038_339089_NZDJPYc_bounce.txt": "941c9b5f304fe65e864fcd311b76d628d4581a4caaff931d0588b010bb4c0f0e",
