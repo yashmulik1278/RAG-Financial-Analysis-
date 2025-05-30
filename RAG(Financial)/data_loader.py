@@ -17,14 +17,43 @@ def build_knowledge_graph(documents, export_to_csv=False, csv_dir=None):
         print("No documents to build knowledge graph")
         return [], []
     
+     # Filter out documents from specific paths and with specific filenames
+    filtered_documents = []
+    excluded_dirs = ['/indexes', '/strategies']
+    excluded_files = ['docks.pkl', 'file_tracker.json', 'index.faiss']
+
+    for doc in documents:
+        # Check if the document's path is in excluded directories
+        if not isinstance(doc, dict) or 'path' not in doc or 'content' not in doc:
+            continue
+        # Check if the document's path is in excluded directories
+        if any(excluded_dir in doc['path'] for excluded_dir in excluded_dirs):
+            continue
+        # Check if the document's filename is in excluded files
+        if os.path.basename(doc['path']) in excluded_files:
+            continue
+        filtered_documents.append(doc)
+    
+    if not filtered_documents:
+        print("No valid documents found after filtering.")
+        return [], []
+    
     graph_builder = KnowledgeGraphBuilder()
     
-    for doc in documents:
-        entities = graph_builder.extract_entities(doc)
-        relationships = graph_builder.extract_relationships(doc)
+    for doc in filtered_documents:
+        entities = graph_builder.extract_entities(doc['content'])
+        relationships = graph_builder.extract_relationships(doc['content'])
         
-        graph_builder.create_nodes(entities)
-        graph_builder.create_relationships(relationships)
+        # Add entities and relationships to the graph without duplication
+        for entity, label in entities:
+            if not any(e['name'] == entity and e['label'] == label for e in graph_builder.entities["nodes"]):
+                graph_builder.create_nodes([(entity, label)])
+        
+        for subject, predicate, obj in relationships:
+            existing_rel = next((rel for rel in graph_builder.entities["relationships"] 
+                                if rel['source'] == subject and rel['target'] == obj and rel['type'] == predicate), None)
+            if not existing_rel:
+                graph_builder.create_relationships([(subject, predicate, obj)])
 
     # Export to CSV if requested
     if export_to_csv:
@@ -112,14 +141,17 @@ def track_file_changes(folder_path, tracker_file):
     new_files = []
     current_hashes = {}
 
+    excluded_dirs = ['/indexes', '/strategies']
+    excluded_files = ['docks.pkl', 'file_tracker.json', 'index.faiss']
+
     for root, _, files in os.walk(folder_path):
-        if root.startswith(os.path.join(folder_path, 'economic_events')):
+        if any(excluded_dir in root for excluded_dir in excluded_dirs):
             continue
         for file in files:
             if file.endswith(('.txt', '.pdf', '.json', '.xlsx', '.xls')):
                 file_path = os.path.join(root, file)
-                if not os.path.isfile(file_path):
-                    continue  # Skip if not a file
+                if file in excluded_files:
+                    continue
                 current_hash = _compute_hash(file_path)
                 current_hashes[file_path] = current_hash
                 if file_path not in tracked or tracked.get(file_path, None) != current_hash:

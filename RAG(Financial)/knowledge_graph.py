@@ -11,19 +11,28 @@ class KnowledgeGraphBuilder:
         
     def extract_entities(self, text):
         doc = nlp(text)
-        return [(ent.text, ent.label_) for ent in doc.ents]
+        seen = set()
+        unique_entities = []
+        for ent in doc.ents:
+            entity = (ent.text, ent.label_)
+            if entity not in seen:
+                seen.add(entity)
+                unique_entities.append(entity)
+        return unique_entities
     
     def extract_relationships(self, text):
         doc = nlp(text)
-        relations = []
-        
+        seen = set()
+        unique_relations = []
         for token in doc:
             if token.dep_ in ("attr", "dobj"):
                 subject = doc[token.head.left_edge.i : token.head.right_edge.i].text
                 object = doc[token.i : token.right_edge.i].text
-                relations.append((subject, token.head.text, object))
-                
-        return relations
+                relation = (subject, token.head.text, object)
+                if relation not in seen:
+                    seen.add(relation)
+                    unique_relations.append(relation)
+        return unique_relations
     
     def create_nodes(self, entities):
         for entity, label in entities:

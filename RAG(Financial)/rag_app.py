@@ -57,11 +57,19 @@ def main():
     for file_path in new_files:
         content = data_loader._read_any_file(file_path)
         if content:
-            new_docs.append(content)
+            new_docs.append({
+                'path': file_path,
+                'content': content
+            })
     
     old_docs = []
     if os.path.exists(DOC_PATH):
         old_docs = data_loader.load_documents(DOC_PATH)
+    
+     # Ensure old_docs are in the correct format
+    if old_docs and isinstance(old_docs[0], str):
+        # Convert old_docs from list of strings to list of dictionaries
+        old_docs = [{'content': doc, 'path': 'unknown'} for doc in old_docs]
     
     docs = new_docs + old_docs
 
@@ -136,8 +144,9 @@ def main():
                 rag_answer = "No documents indexed for RAG approach."
             else:
                 _, indices = index.search(query_embedding, 10)
-                retrieved = [docs[i] for i in indices[0] if i < len(docs)]
-                rag_answer = gemini.generate_answer(query, retrieved)
+                # Extract the content from the retrieved documents
+            retrieved_contents = [docs[i]['content'] for i in indices[0] if i < len(docs)]
+            rag_answer = gemini.generate_answer(query, retrieved_contents)
 
         # Compare and select the best answer
         if "error" in entities_relationships_answer.lower() and "error" in rag_answer.lower():
